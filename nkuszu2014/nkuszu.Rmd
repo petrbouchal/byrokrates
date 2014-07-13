@@ -1,0 +1,150 @@
+---
+title: "Skládání účtů: co říkají data"
+output: html_document
+---
+
+Odpovědnost veřejných institucí je těžko uchopitelný pojem. Anglický a francouzský termín pro odpovědnost - *accountability, comptabilité* - ale ukazují na jeden hmatatelný rozměr odpovědnosti: skládání účtů.
+
+Veřejné účty nejsou zrovna poutavé čtení, ale jsou důležité pro kontrolu veřejných výdajů. Proto je podstatné, aby byly pravdivé. Od toho je audit, ve veřejném sektoru ještě finanční kontrola a speciálně NKÚ. Důležité také je, aby účty byly čitelné. Veřejné účty českého státu na první pohled příliš užitečné nejsou: pro laického uživatele nejsou čitelné a něco se z nich dovědět vyžaduje trpělivost.
+
+Možná ale stojí za to začít od uplného základu: uvádějí české úřady ve svých závěrečných účtech alespoň ty informace, které po nich vyžadují předpisy?
+
+<!-- more -->
+
+Tuto otázku každý rok zodpovídá Nejvyšší kontrolní úřad, když sestavuje své [stanovisko ke státním závěrečnému účtu (pdf)](http://www.nku.cz/assets/publikace/stanovisko-nku-k-szu-2013.pdf). V příloze na konci dokumentu se skrývá důležitá tabulka - bohužel také není příliš uživatelsky přívětivá. Ukazuje, které vyhláškou vyžadované údaje jednotlivé úřady opravdu uvedly ve svém závěrečném účtu. Zpráva stojí za nahlédnují už jen proto, že závěrečný účet částečně převádí do stravitelné podoby. Krom toho v ní najdete i spoustu užitečných komentářů k fungování českých veřejných financí.
+
+Část zjištění NKÚ jsem shrnul v tabulce níže. Nahoře jsou údaje, které v závěrečných účtech nejčastěji chybí, dole naopak několik ukázek údajů, které ve všech účtech rozpočtových kapitol najdete.
+
+* Dobrá zpráva je, že většinu údajů ve většině závěrečných zpráv úřady uvádějí.
+
+* Špatná zpráva je, že nejčastěji chybí informace o efektivitě vynakládání veřejných peněz: 35% závěrečných účtů tyto informace neobsahuje vůbec a dalších 35% jen částečně. Jen každý třetí úřad tedy reportuje o efektivitě svých výdajů tak, jak má.
+
+```{r Process, include=FALSE, echo=FALSE, warning=TRUE, error=TRUE}
+library(pbtools)
+library(knitr)
+setwd('~/github/nkuszu2014/')
+dq <- read.csv('./data-input/nkuszu_dataquality.csv')
+
+dq <- dq[dq$X!='',]
+names(dq)[1] <- 'Udaj'
+names(dq) <- str_replace(names(dq),'X','')
+names(dq) <- str_replace(names(dq),'\\.','')
+
+dqm <- melt(dq, id.vars = 'Udaj')
+dqm$value <- as.character(dqm$value)
+dqm$value <- str_trim(dqm$value)
+dqm$value[dqm$value=='x'] <- 'Chybí'
+dqm$value[dqm$value=='č'] <- 'Částečně'
+dqm$value[dqm$value==''] <- NA
+dqm$value[is.na(dqm$value)] <- 'Uvedeno'
+
+kapmin <- read.csv('./data-input/KapitolyMinisterstva.txt')
+dqm <- merge(dqm,kapmin, by.x='variable',by.y='KapNum')
+
+dqm$value <- factor(dqm$value, levels = c('Chybí','Částečně','Uvedeno'))
+
+dqm_udaj <- dqm %>% group_by(Udaj, value) %>%
+  summarise(count=n()) %>%
+  filter(Udaj != 'TABULKY') %>%
+  ungroup() %>%
+  group_by(Udaj) %>%
+  mutate(countudaj=sum(count)) %>%
+  ungroup() %>%
+  dcast(Udaj + countudaj ~ value,value.var = 'count', fill=0)
+dqm$Udaj <- droplevels(dqm$Udaj)
+
+dqm_udajsum <- dqm_udaj %>%
+  mutate(percproblem =format((Chybí)/countudaj*100, digits=0, na.encode = F),
+         percproblemtext=paste0(percproblem, '%')) %>%
+  filter(min_rank(desc(percproblem)) <= 5 | min_rank(percproblem) == 1) %>%
+  arrange(desc(percproblem)) %>%
+  select('Údaj v závěrečném účtu' = Udaj, 'Kapitoly neuvádějící údaj' = percproblemtext)
+
+dqm_kap <- dqm %>%
+  filter(Udaj != 'TABULKY') %>%
+  cast(KapAbb + KapName + variable + Ministerstvo ~ value,
+       fun.aggregate = 'length') %>%
+  mutate(counterror=Chybí + Částečně,
+         countmissing=Chybí) %>%
+  melt(id.vars = c('KapAbb', 'KapName', 'variable',
+                   'counterror','countmissing','Ministerstvo'),
+       variable_name = 'outcome') %>%
+  arrange(counterror)
+
+dqm_kap$KapName <- factor(dqm_kap$KapName,
+                              levels=dqm_kap$KapName[order(dqm_kap$counterror,
+                                                          dqm_kap$countmissing)])
+loadcustomthemes(mycols = themebasecolours, 'Helvetica')
+```
+
+```{r Tabulka, echo=FALSE, include=TRUE, results='asis'}
+kable(dqm_udajsum, format = 'markdown')
+```
+
+Jak si stojí jednotlivé úřady? Údaje máme za rozpočtové kapitoly; shrnul jsem je graficky níže. (Zvýraznil jsem kapitoly, které jsou spravovány ministerstvy).
+
+Dobrá zpráva opět je, že z většiny závěrečných účtů se lze dozvědět většinu informací, které v nich podle vyhlášky mají být.
+
+Špatná zpráva je, že některé úřady až třetinu údajů ve svých zprávach neposkytují vůbec nebo jen zčásti.
+
+```{r Plot kapitoly, echo=FALSE, include=TRUE, fig.width=8, fig.height=10, warning=FALSE, fig.cap='Zdroj: autor na základě stanoviska NKÚ k SZÚ za 2013',}
+ggplot(dqm_kap, aes(x=KapName, y=value, fill=outcome, alpha=Ministerstvo),
+       colour='white') +
+  geom_bar(position='fill', stat='identity') +
+  scale_fill_manual(values = c('red','orange','lightgreen')) +
+  scale_y_continuous(expand=c(0.045,0), labels=percent) +
+  scale_alpha_discrete(range = c(0.5,1), guide='none') +
+  theme(panel.grid=element_blank(), axis.text=element_text(size=13),
+        legend.position='top', plot.title=element_text(size=17, face='italic',
+                                                       hjust=2.5)) +
+  labs(title='Povinné informace v závěrečných účtech') +
+  coord_flip()
+```
+
+```{r Plotly prepare, echo=FALSE, include=FALSE, warning=FALSE}
+
+# demo code for including plotly graphs - but plotly unable to generate this
+# graph correctly
+
+kapplot <- ggplot(dqm_kap, aes(x=KapName, y=value, fill=outcome, alpha=Ministerstvo),
+       colour='white') +
+  geom_bar(position='fill', stat='identity') +
+  scale_fill_manual(values = c('red','orange','lightgreen')) +
+  scale_y_continuous(expand=c(0,0.05), labels=percent) +
+  scale_alpha_discrete(range = c(0.5,1), guide='none') +
+  theme(panel.grid=element_blank(), axis.text=element_text(size=13),
+        legend.position='top', plot.title=element_text(size=14, face='bold.italic',
+                                                       hjust=1)) +
+  labs(title='Povinné informace v závěrečných účtech') +
+  coord_flip()
+library(devtools)
+# install_github('plotly','ropensci')
+library(plotly)
+pp <- plotly('petrbouchal','a5dzaj09m6')
+```
+
+```{r plotly=TRUE, echo=FALSE, warning=FALSE, include=FALSE}
+# pp$ggplotly(kapplot)
+```
+
+```{r Annotation test, echo=FALSE, include=FALSE}
+g <- ggplotGrob(kapplot)
+
+require(gtable)
+g <- gtable_add_grob(g, grobTree(textGrob("left", x=0, hjust=0), 
+                                textGrob("right", y=1, hjust=1)), 
+                    t=1, l=4)
+
+grid.draw(g)
+```
+
+První kroky tedy musí směřovat k tomu, aby závěrečné účty obsahovaly alespoň ty informace, které po státních úřadech chce české právo. To neznamená jen doplnit pár stránek: informace o efektivitě výdajů nelze do účtů zařadit, pokud úřady svou efektivitu nejsou schopny hodnotit.
+
+Další kroky by měly směřovat k lepší čitelnosti a informativnosti účtů. Pro srovnání doporučuji:
+* [státní závěrečný účet ČR 2013](http://www.mfcr.cz/cs/verejny-sektor/monitoring/plneni-statniho-rozpoctu/2013/statni-zaverecny-ucet-za-rok-2013-17756)
+  - [zpráva NKÚ](http://www.nku.cz/assets/publikace/stanovisko-nku-k-szu-2013.pdf)
+* [Whole of Government Accounts](https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/318657/whole_of_government_accounts_2012-13.pdf) - státní závěrečný účet Velké Británie
+  * [shrnutí](https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/324910/PU1668_WGA_summary_report_revised_layout_4_page_spread_final.pdf)
+  * [zpráva National Audit Office](http://www.nao.org.uk/wp-content/uploads/2014/06/Whole-of-government-accounts-2012-13.pdf) (obdoba NKÚ) a [shrnutí](http://www.nao.org.uk/highlights/whole-of-government-accounts/)
+  
+K historii a důležitosti skládání účtů, doporučuji knížku Jacoba Solla *The Reckoning*, o které jsem tu už [psal](byrokraticke-cteni-do-noveho-tydne-nudge-a-verejne-ucty).
