@@ -27,6 +27,6 @@ shinyApp(
     jobcount <- length(unique(data$Pozice))
     output$counttext <- renderText(paste0(' Nalezeno ',jobcount,' nabidek od ',
                                    deptcount,' uradu. Naposledy zkontrolovano ', datum,'.'))
-    output$data <- renderDataTable(data)
+    output$data <- renderDataTable(data,options = list(bLengthChange=F))
   }
 )
