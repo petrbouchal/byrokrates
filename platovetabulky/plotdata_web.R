@@ -11,6 +11,7 @@ rr$facet(rows=3)
 library("htmlwidgets")
 library("metricsgraphics")
 
+# Sources
 # https://github.com/hrbrmstr/metricsgraphics
 # http://hrbrmstr.github.io/metricsgraphics/
 # http://rud.is/b/2015/02/01/new-release-0-7-of-metricsgraphics-htmlwidget-grids-rollovers/
