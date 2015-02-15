@@ -1,0 +1,92 @@
+---
+title: "mjs_grid"
+author: '@hrbrmstr'
+date: "February 1, 2015"
+output: 
+  html_document:
+    toc: false
+---
+
+```{r echo=FALSE}
+suppressPackageStartupMessages(library(metricsgraphics))
+suppressPackageStartupMessages(library(htmltools))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(reshape2))
+suppressPackageStartupMessages(library(tidyr))
+```
+
+```{r}
+ttall2 <- ttall %>% select(-tridanum)
+ttallw<- spread(ttall2, trida, value)
+plots <- lapply(unique(ttallw$tablelong), function(x) {
+  thisdata <- ttallw %>% filter(tablelong==x) %>% arrange(years)
+  mjs_plot(data = thisdata, x=years, y=trida1,
+           width="300px", height="300px", linked=TRUE) %>%
+    # mjs_line(interpolate = 'step-after') %>%
+    mjs_line(interpolate = 'linear') %>%
+      mjs_add_line(trida2) %>% 
+    # mjs_add_line(trida3) %>% 
+#     mjs_add_line(trida4) %>% 
+#     mjs_add_line(trida5) %>% 
+#     mjs_add_line(trida6) %>% 
+#     mjs_add_line(trida7) %>% 
+#     mjs_add_line(trida8) %>% 
+#     mjs_add_line(trida9) %>% 
+    # mjs_add_line(trida10) %>% 
+#     mjs_add_line(trida11) %>% 
+#     mjs_add_line(trida12) %>% 
+#     mjs_add_line(trida13) %>% 
+#     mjs_add_line(trida14) %>% 
+#     mjs_add_line(trida15) %>% 
+#     mjs_add_line(trida16) %>% 
+    mjs_labs(x_label=sprintf(x))
+})
+```
+
+```{r echo=FALSE, results="asis"}
+mjs_grid(plots)
+```
+
+```{r}
+tips <- reshape2::tips
+a <- tips %>%
+  mutate(percent=tip/total_bill,
+         day=factor(day, levels=c("Thur", "Fri", "Sat", "Sun"), ordered=TRUE)) %>%
+  group_by(sex, day) %>%
+  do( plot={ x_label <- sprintf("Total Bill (%s)", unique(.$sex))
+             y_label <- sprintf("Tip %% (%s)", unique(.$day))
+             mjs_plot(., x=total_bill, y=percent, width="250px", height="250px", left=100) %>%
+               mjs_point() %>%
+               mjs_labs(x_label=x_label, y_label=y_label) })
+```
+
+```{r eval=FALSE}
+mjs_grid(a$plot, ncol=4, nrow=2, widths=c(rep(0.5, 2)))
+```
+
+```{r echo=FALSE, results="asis"}
+mjs_grid(a$plot, ncol=4, nrow=2, widths=c(rep(0.5, 2)))
+```
+
+```{r}
+tips <- reshape2::tips
+a <- tips %>%
+  mutate(percent=tip/total_bill,
+         day=factor(day, levels=c("Thur", "Fri", "Sat", "Sun"), ordered=TRUE)) %>%
+  group_by(day) %>%
+  do( plot={ day_label <- unique(.$day)
+             mjs_plot(., x=total_bill, y=percent, width="350px", height="350px", left=100) %>%
+               mjs_point(color_accessor=sex, color_type="category") %>%
+               mjs_labs(x_label=sprintf("Total Bill (%s)", day_label), y_label="Tip %") })
+```
+
+```{r eval=FALSE}
+mjs_grid(a$plot, ncol=2, nrow=2, widths=c(0.5, 0.5))
+```
+
+```{r echo=FALSE, results="asis"}
+mjs_grid(a$plot, ncol=2, nrow=2, widths=c(0.5, 0.5))
+```
+
+
+
