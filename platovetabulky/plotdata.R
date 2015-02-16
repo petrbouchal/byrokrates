@@ -3,6 +3,7 @@ source('./platovetabulky/readdata.R')
 
 loadcustomthemes(themecolours, 'Helvetica')
 
+# Some ggplot
 ggplot(ttall, aes(years, value/1e3, colour=tridanum, group=tridanum)) +
   geom_step() +
   scale_y_continuous(labels=comma, limits=c(0,50)) +
