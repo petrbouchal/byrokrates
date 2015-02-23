@@ -5,6 +5,7 @@ library(rCharts)
 
 rr <- rPlot(value ~ years | tablelong, color = 'tridanum', data=ttall, type='line')
 rr$facet(rows=3)
+rr
 
 # htmlwidgets
 
@@ -18,8 +19,9 @@ library("metricsgraphics")
 
 lapply(1:7, function(x) {
   mjs_plot(rnorm(10000, mean=x/2, sd=x), width=250, height=250, linked=TRUE) %>%
-    mjs_line(interpolate = 'step') %>%
+    mjs_line(interpolate = 'step')
     mjs_labs(x_label=sprintf(x))
 }) -> plots
+
 
 mjs_grid(plots)
