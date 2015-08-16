@@ -1,0 +1,107 @@
+---
+title: "Blogpost"
+output:
+  html_document:
+    fig_caption: true
+---
+
+``` {r Knitr prep, cache=FALSE,include=FALSE}
+library(knitr)
+# set up graphing:
+opts_chunk$set(echo=FALSE, dev='cairo_pdf', warning=FALSE, fig.width=600/74)
+# make relative references work - change this to project directory
+opts_knit$set(root.dir='~/github/byrokrates/')
+```
+
+``` {r Load tools library from anywhere, include=FALSE, echo=FALSE}
+# install.packages(devtools)
+# library(devtools)
+# install_github('pbtools','petrbouchal')
+library(pbtools)
+```
+
+
+```{r Process, include=FALSE, echo=FALSE, warning=TRUE, error=TRUE}
+library(pbtools)
+library(knitr)
+library(readxl)
+setwd('~/github/byrokrates/nkuszu2015/')
+dq <- read_excel('./data-input/nkuszu_dataquality.xlsx')
+
+names(dq)[1] <- 'Udaj'
+
+dqm <- melt(dq, id.vars = c("Udaj","tabulky"))
+dqm$value <- as.character(dqm$value)
+dqm$value <- str_trim(dqm$value)
+dqm$value[dqm$value=='x'] <- 'Chybí'
+dqm$value[dqm$value=='č'] <- 'Částečně'
+dqm$value[is.na(dqm$value)] <- 'Uvedeno'
+
+kapmin <- read.csv('./data-input/KapitolyMinisterstva.txt')
+dqm <- merge(dqm,kapmin, by.x='variable',by.y='KapNum')
+
+dqm$value <- factor(dqm$value, levels = c('Chybí','Částečně','Uvedeno'))
+
+dqm_udaj <- dqm %>% group_by(Udaj, value) %>%
+  summarise(pocet=n()) %>%
+  filter(Udaj != 'TABULKY') %>%
+  ungroup() %>%
+  group_by(Udaj) %>%
+  mutate(countudaj=sum(pocet)) %>%
+  ungroup() %>%
+  dcast(Udaj + countudaj ~ value,value.var = 'pocet', fill=0)
+
+dqm_udajsum <- dqm_udaj %>%
+  mutate(percproblem =format((Chybí)/countudaj*100, digits=0, na.encode = F),
+         percproblemtext=paste0(percproblem, '%')) %>%
+  filter(min_rank(desc(percproblem)) <= 5 | min_rank(percproblem) == 1) %>%
+  arrange(desc(percproblem)) %>%
+  select('Údaj v závěrečném účtu' = Udaj, 'Kapitoly neuvádějící údaj' = percproblemtext)
+
+dqm_kap <- dqm %>%
+  filter(Udaj != 'TABULKY') %>%
+  dcast(KapAbb + KapName + variable + Ministerstvo ~ value) %>%
+  mutate(counterror=Chybí + Částečně,
+         countmissing=Chybí) %>%
+  melt(id.vars = c('KapAbb', 'KapName', 'variable',
+                   'counterror','countmissing','Ministerstvo'),
+       variable.name = 'outcome') %>%
+  arrange(counterror)
+
+dqm_kap$KapName <- factor(dqm_kap$KapName,
+                              levels=dqm_kap$KapName[order(dqm_kap$counterror,
+                                                          dqm_kap$countmissing)])
+loadcustomthemes(mycols = themebasecolours, 'Helvetica')
+```
+
+Summary here before break
+
+<!--more-->
+
+## Heading 2
+
+More text here
+
+```{r Plot kapitoly, echo=FALSE, include=TRUE, fig.width=8, fig.height=10, warning=FALSE, fig.cap='Zdroj: autor na základě stanoviska NKÚ k SZÚ za 2013',}
+ggplot(dqm_kap, aes(x=KapName, y=value, fill=outcome, alpha=Ministerstvo),
+       colour='white') +
+  geom_bar(position='fill', stat='identity') +
+  scale_fill_manual(values = c('red','orange','lightgreen')) +
+  scale_y_continuous(expand=c(0.045,0), labels=percent) +
+  scale_alpha_discrete(range = c(0.5,1), guide='none') +
+  theme(panel.grid=element_blank(), axis.text=element_text(size=13),
+        legend.position='top', plot.title=element_text(size=17, face='italic',
+                                                       hjust=2.5)) +
+  labs(title='Povinné informace v závěrečných účtech') +
+  coord_flip()
+```
+
+```{r Plot, include=FALSE, echo=FALSE, fig.cap='Figure caption', warning=FALSE}
+# generate plot here
+
+
+
+# ideally include gtable code here to bake in source line and well-formatted title 
+# directly into the image
+
+# publish by knit2byrokrates(file, publish=F, preview=T, title='Title')
