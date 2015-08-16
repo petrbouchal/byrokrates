@@ -22,7 +22,7 @@ Tuto otázku každý rok zodpovídá Nejvyšší kontrolní úřad, když sestav
 ```{r Process, include=FALSE, echo=FALSE, warning=TRUE, error=TRUE}
 library(pbtools)
 library(knitr)
-setwd('~/github/nkuszu2014/')
+setwd('~/github/byrokrates/nkuszu2014/')
 dq <- read.csv('./data-input/nkuszu_dataquality.csv')
 
 dq <- dq[dq$X!='',]
@@ -62,13 +62,12 @@ dqm_udajsum <- dqm_udaj %>%
 
 dqm_kap <- dqm %>%
   filter(Udaj != 'TABULKY') %>%
-  cast(KapAbb + KapName + variable + Ministerstvo ~ value,
-       fun.aggregate = 'length') %>%
+  dcast(KapAbb + KapName + variable + Ministerstvo ~ value) %>%
   mutate(counterror=Chybí + Částečně,
          countmissing=Chybí) %>%
   melt(id.vars = c('KapAbb', 'KapName', 'variable',
                    'counterror','countmissing','Ministerstvo'),
-       variable_name = 'outcome') %>%
+       variable.name = 'outcome') %>%
   arrange(counterror)
 
 dqm_kap$KapName <- factor(dqm_kap$KapName,
