@@ -1,5 +1,5 @@
 library(pbtools)
-library(XML)
+library(rvest)
 library(car)
 
 x = readHTMLTable('./platovetabulky/kupnisila_tabulky20150215.html',header = TRUE,encoding = "UTF-8")
