@@ -140,10 +140,11 @@ grid.draw(g)
 První kroky tedy musí směřovat k tomu, aby závěrečné účty obsahovaly alespoň ty informace, které po státních úřadech chce české právo. To neznamená jen doplnit pár stránek: informace o efektivitě výdajů nelze do účtů zařadit, pokud úřady svou efektivitu nejsou schopny hodnotit.
 
 Další kroky by měly směřovat k lepší čitelnosti a informativnosti účtů. Pro srovnání doporučuji:
+
 * [státní závěrečný účet ČR 2013](http://www.mfcr.cz/cs/verejny-sektor/monitoring/plneni-statniho-rozpoctu/2013/statni-zaverecny-ucet-za-rok-2013-17756)
-  - [zpráva NKÚ](http://www.nku.cz/assets/publikace/stanovisko-nku-k-szu-2013.pdf)
+* [zpráva NKÚ](http://www.nku.cz/assets/publikace/stanovisko-nku-k-szu-2013.pdf)
 * [Whole of Government Accounts](https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/318657/whole_of_government_accounts_2012-13.pdf) - státní závěrečný účet Velké Británie
-  * [shrnutí](https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/324910/PU1668_WGA_summary_report_revised_layout_4_page_spread_final.pdf)
-  * [zpráva National Audit Office](http://www.nao.org.uk/wp-content/uploads/2014/06/Whole-of-government-accounts-2012-13.pdf) (obdoba NKÚ) a [shrnutí](http://www.nao.org.uk/highlights/whole-of-government-accounts/)
+* [shrnutí](https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/324910/PU1668_WGA_summary_report_revised_layout_4_page_spread_final.pdf)
+* [zpráva National Audit Office](http://www.nao.org.uk/wp-content/uploads/2014/06/Whole-of-government-accounts-2012-13.pdf) (obdoba NKÚ) a [shrnutí](http://www.nao.org.uk/highlights/whole-of-government-accounts/)
   
 K historii a důležitosti skládání účtů, doporučuji knížku Jacoba Solla *The Reckoning*, o které jsem tu už [psal](byrokraticke-cteni-do-noveho-tydne-nudge-a-verejne-ucty).

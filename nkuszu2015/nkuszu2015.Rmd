@@ -26,9 +26,9 @@ library(pbtools)
 library(knitr)
 library(readxl)
 setwd('~/github/byrokrates/nkuszu2015/')
-dq <- read_excel('./data-input/nkuszu_dataquality.xlsx')
+dq <- read_excel('./data-input/nkuszu_dataquality2015.xlsx')
 
-names(dq)[1] <- 'Udaj'
+names(dq)[c(1,2)] <- c('Udaj','tabulky')
 
 dqm <- melt(dq, id.vars = c("Udaj","tabulky"))
 dqm$value <- as.character(dqm$value)
@@ -74,6 +74,10 @@ dqm_kap$KapName <- factor(dqm_kap$KapName,
 loadcustomthemes(mycols = themebasecolours, 'Helvetica')
 ```
 
+```{r Tabulka, echo=FALSE, include=TRUE, results='asis'}
+kable(dqm_udajsum, format = 'markdown')
+```
+
 Summary here before break
 
 <!--more-->
@@ -82,7 +86,7 @@ Summary here before break
 
 More text here
 
-```{r Plot kapitoly, echo=FALSE, include=TRUE, fig.width=8, fig.height=10, warning=FALSE, fig.cap='Zdroj: autor na základě stanoviska NKÚ k SZÚ za 2013',}
+```{r Plot kapitoly, echo=FALSE, include=TRUE, fig.width=8, fig.height=10, warning=FALSE, fig.cap='Zdroj: autor na základě stanoviska NKÚ k SZÚ za 2014',}
 ggplot(dqm_kap, aes(x=KapName, y=value, fill=outcome, alpha=Ministerstvo),
        colour='white') +
   geom_bar(position='fill', stat='identity') +
@@ -95,13 +99,3 @@ ggplot(dqm_kap, aes(x=KapName, y=value, fill=outcome, alpha=Ministerstvo),
   labs(title='Povinné informace v závěrečných účtech') +
   coord_flip()
 ```
-
-```{r Plot, include=FALSE, echo=FALSE, fig.cap='Figure caption', warning=FALSE}
-# generate plot here
-
-
-
-# ideally include gtable code here to bake in source line and well-formatted title 
-# directly into the image
-
-# publish by knit2byrokrates(file, publish=F, preview=T, title='Title')
