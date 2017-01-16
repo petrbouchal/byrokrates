@@ -98,16 +98,18 @@ ttall <- cleanup(ttall)
 
 ttall <- ttall %>% group_by(tabulka, trida) %>% mutate(years = lag(years, default = 0))
 
-ttall$tablelong <- recode(ttall$tabulka,
-                          "'Tabulka 4' = 'Úředníci, strážníci aj.';
-                          'Tabulka 3' = 'Sociální pracovníci';
-                          'Tabulka 9' = 'Učitelé';
-                          'Tabulka 7' = 'Lékaři v sociálním zabezpečení';
-                          'Tabulka 5' = 'Lékaři v obraně';
-                          'Tabulka 8' = 'Lékaři v záchranné službě aj.';
-                          'Tabulka 6' = 'Další zdravotničtí';
-                          'Tabulka 2' = 'Ostatní zdravotničtí';
-                          'Tabulka 1' = 'Ostatní'")
+ttall$tablelong <- ttall$tabulka
+
+# ttall$tablelong <- recode(ttall$tabulka,
+#                           "'Tabulka 4' = 'Úředníci, strážníci aj.';
+#                           'Tabulka 3' = 'Sociální pracovníci';
+#                           'Tabulka 9' = 'Učitelé';
+#                           'Tabulka 7' = 'Lékaři v sociálním zabezpečení';
+#                           'Tabulka 5' = 'Lékaři v obraně';
+#                           'Tabulka 8' = 'Lékaři v záchranné službě aj.';
+#                           'Tabulka 6' = 'Další zdravotničtí';
+#                           'Tabulka 2' = 'Ostatní zdravotničtí';
+#                           'Tabulka 1' = 'Ostatní'")
 
 ttall$tablelong <- as.factor(ttall$tablelong)
 ttall$tablelong <- factor(ttall$tablelong, levels(ttall$tablelong)[c(9,8,7,4,3,2,1,6,5)])
