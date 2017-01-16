@@ -1,4 +1,5 @@
 # library(pbtools)
+library(dplyr)
 library(reshape2)
 library(ggplot2)
 library(stringr)
@@ -11,6 +12,8 @@ library(car)
 p2015 = readHTMLTable('./platovetabulky/kupnisila_tabulky20150215.html',header = TRUE)
 p2016a = readHTMLTable('./platovetabulky/kupnisila_tabulky2016a.html',header = T)
 p2016b = readHTMLTable('./platovetabulky/kupnisila_tabulky2016b.html',header = T)
+x = readHTMLTable('./platovetabulky/kupnisila_tabulky20150215.html',header = TRUE,encoding = "UTF-8")
+t1 <- x[[1]]
 # source: http://kupnisila.cz/platove-tridy-tabulky/
 
 # View(p2016b[[1]])
